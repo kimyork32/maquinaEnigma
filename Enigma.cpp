@@ -1,6 +1,12 @@
 #include "Enigma.h"
 
-  Enigma::Enigma(vector<string> confi){
+void Enigma::print(string t){
+  cout << t << endl;
+}
+Enigma::Enigma(vector<string> confi){
+  float ax = logisticMap(a0, u, 490);
+  valores.push_back(logisticMapNoRecursive(ax, u));
+
   int num_confi=confi.size();
   vector<int> tablero_de_enchufescontacts;
   checkConfigTableroEnchufes(confi[0],tablero_de_enchufescontacts);
@@ -289,5 +295,80 @@ void Enigma::encriptarMensaje(char& letra){
     }
   }
   indice_actual = tablero_de_enchufes->mapear(indice_actual);
+  // letra = indice_actual+'A';
+  letra = indice_actual;
+  
+  
+  // ENCRIPTACION CESAR
+  
+  int r = (static_cast<int>(valores[valores.size()-1] * 1000)) % 26;
+  // int r = static_cast<int>(round(valores[valores.size()-1] * 100000)) % 26;
+
+  letra = (letra+r)%26+'A';
+  valores.push_back(logisticMapNoRecursive(valores[valores.size()-1], u));
+}
+
+void Enigma::desencriptarMensaje(char& letra){
+
+
+  // DESENCRIPTACION CESAR
+  int r = (static_cast<int>(valores[valores.size()-1] * 1000)) % 26; 
+  // int r = static_cast<int>(round(valores[valores.size()-1] * 1000)) % 26;
+
+
+
+  letra = letra - 'A';
+  if(letra-r <0){
+    letra = letra-r+26+'A';
+  }
+  else{
+    letra = (letra-r)%26+'A';
+  }
+  valores.push_back(logisticMapNoRecursive(valores[valores.size()-1], u));
+
+  int indice_actual = letra - 'A'; 
+  indice_actual = tablero_de_enchufes->mapear(indice_actual); 
+
+  if(num_de_rotores > 0){
+    rotores[num_de_rotores-1].rotar();
+  }
+
+  if(num_de_rotores > 0){
+    for(int i = num_de_rotores ; i > 0; i--){
+      indice_actual = rotores[i-1].cambiarAbajo(indice_actual); 
+      indice_actual = rotores[i-1].mapearAdelante(indice_actual);
+      indice_actual = rotores[i-1].cambiarArriba(indice_actual); 
+      if(rotores[i-1].esPosActualEnMuesca() &&
+         rotores[i-1].getPosAnterior() != \
+         rotores[i-1].getPosActual()){
+        if(i-1 > 0){
+          rotores[i-2].rotar();
+        }
+      }
+    }
+  }
+  indice_actual = reflector->mapear(indice_actual);
+  if(num_de_rotores > 0){
+    for(int i = 0; i < num_de_rotores; i++){
+      indice_actual = rotores[i].cambiarAbajo(indice_actual);
+      indice_actual = rotores[i].mapearAtras(indice_actual);
+      indice_actual = rotores[i].cambiarArriba(indice_actual);
+    }
+  }
+  indice_actual = tablero_de_enchufes->mapear(indice_actual);
   letra = indice_actual + 'A';
 }
+
+double Enigma::logisticMap(double a, double u, int iterations) {
+    // Caso base: si las iteraciones llegan a 0, devuelve el valor actual de 'a'
+    if (iterations == 0) {
+        return a;
+    } else {
+        // Llamada recursiva con la siguiente iteración
+        return logisticMap(u * a * (1 - a), u, iterations - 1);
+    }
+}
+double Enigma::logisticMapNoRecursive(double a, double u) {
+  return u * a * (1 - a);
+}
+
