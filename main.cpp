@@ -1,18 +1,17 @@
-// #include "Enigma.h"
-// #include "alfabeto.h"
-// #include "errores.h"
-// #include <iostream>
-// #include <fstream>
-// #include <cstring>
-// #include <string>
-// #include <cctype>
+#include "Enigma.h"
+#include "alfabeto.h"
+#include "errores.h"
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <string>
+#include <cctype>
 #include <locale>
 #include <string>
 #include <codecvt>
 #include <fstream>
 #include <cctype>
 
-#include "Menu.h"
 
 using namespace std;
 
@@ -127,7 +126,7 @@ int main(){
     vector<int> posEsp;
     Enigma *enigmaEmisora = nullptr;
     Enigma *enigmaReceptora = nullptr;
-    vector<string> confi = {"plugboards/I.pb", "reflectors/I.rf", "rotors/I.rot", "rotors/II.rot", "rotors/III.rot", "rotors/I.pos"};
+    vector<string> confi = {"plugboards/I.pb", "reflectores/I.rf", "rotores/I.rot", "rotores/II.rot", "rotores/III.rot", "rotores/I.pos"};
     enigmaEmisora = new Enigma(confi);
     enigmaReceptora = new Enigma(confi);
 
@@ -151,7 +150,7 @@ int main(){
     for(char letra : texto){
         if(letra!=' '){
             if(letra - 'A' < 0 || ALFABETO_LENGTH -1 < letra - 'A'){
-                cerr << letra << " is not a valid input character (input characters must be upper case letters A-Z)!" << endl;
+                cerr << letra << " <No es un caracter de entrada valido (A-Z)>" << endl;
                 delete enigmaEmisora;
                 return INVALID_INPUT_CHARACTER;
             }        
@@ -161,9 +160,9 @@ int main(){
     }
 
     // poniendo espacios en texto cifrado
-    for(int i=0; i<posEsp.size(); i++){
-        textoCifrado.insert(textoCifrado.begin() + posEsp[i], ' ');
-    }
+    // for(int i=0; i<posEsp.size(); i++){
+    //     textoCifrado.insert(textoCifrado.begin() + posEsp[i], ' ');
+    // }
     // cout << "texto cifrado:\t" << textoCifrado << endl;
     for(int i=0; i<100; i++){
         cout << textoCifrado[i];
@@ -179,7 +178,7 @@ int main(){
     for(char letra : textoCifrado){
         if(letra!=' '){
             if(letra - 'A' < 0 || ALFABETO_LENGTH -1 < letra - 'A'){
-                cerr << letra << " is not a valid input character (input characters must be upper case letters A-Z)!" << endl;
+                cerr << letra << " no es un caracter de entrada valido (A-Z)" << endl;
                 delete enigmaReceptora;
                 return INVALID_INPUT_CHARACTER;
             }        

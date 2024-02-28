@@ -15,9 +15,13 @@ using namespace std;
 
 class Enigma{
 private:
-  int countPal;
+
+  //VARIABLES INDEPENDIENTES
   double u = 3.99446;
   double a0 = 0.0927856134324;
+  int b = 4;
+  int nIteraciones=500;
+
   vector<double> valores;
   vector<Rotor> rotores;
   vector<int> posiciones_rotores;

@@ -4,7 +4,7 @@ void Enigma::print(string t){
   cout << t << endl;
 }
 Enigma::Enigma(vector<string> confi){
-  float ax = logisticMap(a0, u, 490);
+  float ax = logisticMap(a0, u, nIteraciones);
   valores.push_back(logisticMapNoRecursive(ax, u));
 
   int num_confi=confi.size();
@@ -45,8 +45,7 @@ Enigma::~Enigma(){
     }
 }
 
-bool Enigma::esEntradaValidaTableroConexiones(string archivo, fstream& in_stream, \
-  int& index_num){
+bool Enigma::esEntradaValidaTableroConexiones(string archivo, fstream& in_stream, int& index_num){
   in_stream >> ws;
   int end_of_file = in_stream.peek();
   if(end_of_file == EOF){
@@ -56,20 +55,21 @@ bool Enigma::esEntradaValidaTableroConexiones(string archivo, fstream& in_stream
   if(in_stream.fail()){
     cerr << "Caracter no numerico en el archivo del panel de conexiones " << archivo << endl;
     in_stream.close();
-    throw string("NON_NUMERIC_CHARACTER");
+    throw string("CARACTER NO NUMERICO");
   }
   if(!rangoDeNumerosEsCorrecto(index_num)){
     cerr << "El archivo " << archivo << \
     " contiene un numero que no esta entre 0 y 25" << endl;
     in_stream.close();
-    throw(INVALID_INDEX);
+    // throw(INVALID_INDEX);
+    throw string("INDICE INVALIDO");
   }
   return true;
 }
 
 void Enigma::checkConfigTableroEnchufes(string archivo, vector<int>& contacts){
-  int even_index_num; // par
-  int odd_index_num; // impar
+  int indice_num_par; // par
+  int indice_num_impar; // impar
   int count = 0;
   fstream in_stream;
   in_stream.open(archivo);
@@ -80,24 +80,24 @@ void Enigma::checkConfigTableroEnchufes(string archivo, vector<int>& contacts){
   }
 
   while(!in_stream.eof()){
-    if(!esEntradaValidaTableroConexiones(archivo, in_stream, even_index_num)){
+    if(!esEntradaValidaTableroConexiones(archivo, in_stream, indice_num_par)){
       break;
     }
-    if(!esEntradaValidaTableroConexiones(archivo, in_stream, odd_index_num)){
+    if(!esEntradaValidaTableroConexiones(archivo, in_stream, indice_num_impar)){
       cerr << "Numero incorrecto de parametros en el archivo del panel de conexiones " \
       << archivo << endl;
       in_stream.close();
       throw string("INCORRECT_NUMBER_OF_PLUGBOARD_PARAMETERS");
     }
-    contacts.push_back(even_index_num);
-    if(checkAparecioAntes(contacts, even_index_num, count) != -1){
+    contacts.push_back(indice_num_par);
+    if(checkAparecioAntes(contacts, indice_num_par, count) != -1){
       in_stream.close();
       throw string("INCORRECT_NUMBER_OF_PLUGBOARD_PARAMETERS");
     }
     count++;
 
-    contacts.push_back(odd_index_num);
-    if(checkAparecioAntes(contacts, odd_index_num, count) != -1){
+    contacts.push_back(indice_num_impar);
+    if(checkAparecioAntes(contacts, indice_num_impar, count) != -1){
       in_stream.close();
       throw ("INCORRECT_NUMBER_OF_PLUGBOARD_PARAMETERS");
     }
@@ -114,7 +114,7 @@ void Enigma::checkConfigReflector(string archivo, vector<int>& contacts){
   if(in_stream.fail()){
     cerr << "Error al abrir o leer el archivo de configuracion " << archivo << endl;
     in_stream.close();
-    throw string("ERROR_OPENING_CONFIGURATION_FILE");
+    throw string("ERROR AL ABRIR EL ARCHIVO DE CONFIGURACIÓN");
   }
 
   while(!in_stream.eof()){
@@ -132,13 +132,13 @@ void Enigma::checkConfigReflector(string archivo, vector<int>& contacts){
     if(!rangoDeNumerosEsCorrecto(num)){
       cerr << "El archivo " << archivo << " contiene un numero que no esta entre 0 y 25" << endl;
       in_stream.close();
-      throw string("INVALID_INDEX");
+      throw string("INDICE INVALIDO");
     }
     contacts.push_back(num);
     if(count < ALFABETO_LENGTH && \
       checkAparecioAntes(contacts, num, count) != -1){
       in_stream.close();
-      throw string("INVALID_REFLECTOR_MAPPING");
+      throw string("MAPEO DE REFLECTORES NO VALIDO");
     }
     count++;
 
@@ -148,12 +148,12 @@ void Enigma::checkConfigReflector(string archivo, vector<int>& contacts){
   if(count%2!=0){
       cerr << "Numero incorrecto (impar) de parámetros en el archivo reflector "
       << archivo << endl;
-      throw string("INCORRECT_NUMBER_OF_PLUGBOARD_PARAMETERS");
+      throw string("NUMERO INCORRECTO DE PARAMETROS DEL TABLERO");
   }
   if(count != ALFABETO_LENGTH){
     cerr << "Numero insuficiente de asignaciones en el archivo reflector: "
     << archivo << endl;
-    throw string("INCORRECT_NUMBER_OF_REFLECTOR_PARAMETERS");
+    throw string("NUMERO INCORRECTO DE PARAMETROS DEL REFLECTOR");
   }
 }
 
@@ -165,7 +165,7 @@ void Enigma::checkConfigRotor(string archivo, vector<int>& contacts){
   if(in_stream.fail()){
     cerr << "Error al abrir o leer el archivo de configuracion " << archivo << endl;
     in_stream.close();
-    throw string("ERROR_OPENING_CONFIGURATION_FILE");
+    throw string("ERROR AL ABRIR EL ARCHIVO DE CONFIGURACION");
   }
 
   while(!in_stream.eof()){
@@ -180,20 +180,20 @@ void Enigma::checkConfigRotor(string archivo, vector<int>& contacts){
       cerr << "Caracter no numerico para mapeo en archivo de rotor "
       << archivo << endl;
       in_stream.close();
-      throw string("NON_NUMERIC_CHARACTER");
+      throw string("CARACTER NO NUMERICO");
     }
     if(!rangoDeNumerosEsCorrecto(num)){
       cerr << "El archivo " << archivo \
       << " contiene un número que no está entre 0 y 25" << endl;
       in_stream.close();
-      throw string("INVALID_INDEX");
+      throw string("INDICE INVALIDO");
     }
     contacts.push_back(num);
 
     if(count < ALFABETO_LENGTH-1 && \
       checkAparecioAntes(contacts, num, count) != -1){
       in_stream.close();
-      throw string("INVALID_ROTOR_MAPPING");
+      throw string("MAPEO DE ROTOR NO VALIDO");
     }
     count++;
   }
@@ -201,7 +201,7 @@ void Enigma::checkConfigRotor(string archivo, vector<int>& contacts){
 
   if(count < ALFABETO_LENGTH){
     cerr << "No todas las entradas asignadas en el archivo del rotor: " << archivo << endl;
-    throw string("INVALID_ROTOR_MAPPING");
+    throw string("MAPEO DE ROTOR NO VALIDO");
   }
 }
 
@@ -213,7 +213,7 @@ void Enigma::checkConfigPosicionesRotor(string archivo){
   if(in_stream.fail()){
     cerr << "Error al abrir o leer el archivo de configuracion " << archivo << endl;
     in_stream.close();
-    throw string("ERROR_OPENING_CONFIGURATION_FILE");
+    throw string("ERROR AL ABRIR ARCHIVO DE CONFIGURACION");
   }
   while(!in_stream.eof()){
     in_stream >> ws;
@@ -225,14 +225,14 @@ void Enigma::checkConfigPosicionesRotor(string archivo){
     if(in_stream.fail()){
       cerr << "Caracter no numerico en el archivo de posiciones del rotor " << archivo  << endl;
       in_stream.close();
-      throw string("NON_NUMERIC_CHARACTER");
+      throw string("CARACTER NO NUMERICO");
     }
 
     if(!rangoDeNumerosEsCorrecto(num)){
       cerr << "El archivo " << archivo \
       << " contiene un numero que no esta entre 0 y 25" << endl;
       in_stream.close();
-      throw string("INVALID_INDEX");
+      throw string("INDICE INVALIDO");
     }
     count++;
     posiciones_rotores.push_back(num);
@@ -243,7 +243,7 @@ void Enigma::checkConfigPosicionesRotor(string archivo){
     cerr << "Sin posicion inicial para el rotor " << num_de_rotores + diff \
     << " en el archivo de posicion del rotor: " << archivo << endl;
     in_stream.close();
-    throw string("NO_ROTOR_STARTING_POSITION");
+    throw string("POSICION DEL ROTOR NO INICIADA");
   }
   in_stream.close();
 }
@@ -301,8 +301,7 @@ void Enigma::encriptarMensaje(char& letra){
   
   // ENCRIPTACION CESAR
   
-  int r = (static_cast<int>(valores[valores.size()-1] * 1000)) % 26;
-  // int r = static_cast<int>(round(valores[valores.size()-1] * 100000)) % 26;
+  int r = (static_cast<int>(valores[valores.size()-1] * pow(10, b))) % ALFABETO_LENGTH;
 
   letra = (letra+r)%26+'A';
   valores.push_back(logisticMapNoRecursive(valores[valores.size()-1], u));
@@ -312,10 +311,7 @@ void Enigma::desencriptarMensaje(char& letra){
 
 
   // DESENCRIPTACION CESAR
-  int r = (static_cast<int>(valores[valores.size()-1] * 1000)) % 26; 
-  // int r = static_cast<int>(round(valores[valores.size()-1] * 1000)) % 26;
-
-
+  int r = (static_cast<int>(valores[valores.size()-1] * pow(10, b))) % ALFABETO_LENGTH; 
 
   letra = letra - 'A';
   if(letra-r <0){
